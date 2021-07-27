@@ -14,13 +14,24 @@ app = Flask(__name__)
 # POST /call - send data to twilio
 @app.route('/call', methods=['POST'])
 def make_call():
-    request_data = request.get_json();
+    request_data = request.get_json()
     client.calls.create(
-        twiml='<Response><Say>Ahoy, World!</Say></Response>',
+        method='GET',
+        status_callback='https://www.myapp.com/events',
+        status_callback_event=['ringing', 'answered', 'completed'],
+        status_callback_method='POST',
+        twiml='<Response><Say>Hello there, its me, your friend. Will you by this car from me?</Say></Response>',
         to=request_data['phoneNumber'],
         from_= os.environ['TWILIO_PHONE']
     )
     return call.sid
+
+# POST /webhook - recieve data from twilio
+@app.route('/webhook')
+def twilio_webhooks():
+    request_data = request.get_json()
+    print(request_data)
+    return 'Ok'
 
 # GET / - serve html
 @app.route('/', methods=['GET'])
