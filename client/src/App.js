@@ -25,7 +25,7 @@ const App = () => {
   });
   // submit handler
   const onSubmitHandler = values => {
-    fetch('/chat', {
+    fetch('/call', {
       method: 'POST', // or 'PUT'
       headers: {
         'Content-Type': 'application/json',
@@ -52,7 +52,7 @@ const App = () => {
         >
           <Form className="form">
             <label className="label" htmlFor="phoneNumber">
-              Enter Your Phone
+              Enter Phone Number
             </label>
             <Field
               className="input-field"

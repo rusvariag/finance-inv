@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request
+from flask import Flask, request, jsonify, send_from_directory
 from twilio.rest import Client
 
 # Account SID from twilio.com/console
@@ -9,28 +9,32 @@ auth_token  = os.environ['TWILIO_AUTH_TOKEN']
 # twilio client
 client = Client(account_sid, auth_token)
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
+
+@app.route('/')
+def serve():
+    return send_from_directory(app.static_folder, 'index.html')
+
 
 # POST /call - send data to twilio
 @app.route('/call', methods=['POST'])
 def make_call():
     request_data = request.get_json()
-    client.calls.create(
+    call = client.calls.create(
         method='GET',
-        status_callback='https://www.myapp.com/events',
-        status_callback_event=['ringing', 'answered', 'completed'],
+        status_callback='https://6147998c8ba0.ngrok.io/webhook',
+        status_callback_event=['initiated', 'ringing', 'answered', 'completed'],
         status_callback_method='POST',
         twiml='<Response><Say>Hello there, its me, your friend. Will you by this car from me?</Say></Response>',
         to=request_data['phoneNumber'],
         from_= os.environ['TWILIO_PHONE']
     )
-    return call.sid
+    return jsonify(call.sid)
 
 # POST /webhook - recieve data from twilio
-@app.route('/webhook')
+@app.route('/webhook', methods=['POST'])
 def twilio_webhooks():
-    request_data = request.get_json()
-    print(request_data)
+    print(request.form.get('CallStatus'))
     return 'Ok'
 
 # GET / - serve html
@@ -38,4 +42,4 @@ def twilio_webhooks():
 def home():
     return 'Hello, world!'
 
-app.run(host="10.0.0.100", port=3001)
+app.run(port=3001)
