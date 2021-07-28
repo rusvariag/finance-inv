@@ -1,18 +1,23 @@
 // import stuff
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Formik, Field, Form } from 'formik';
 import * as Yup from 'yup';
+import socketIOClient from 'socket.io-client';
 
 // import styles
 import './styles.css';
 
+// constants
+const NEW_EVENT = 'newStatus';
+
 const App = () => {
+  const socketRef = useRef();
   // initail state for app
   const initialValues = {
     phoneNumber: '',
   };
   // states
-  const [status, setStatus] = useState('calling...');
+  const [status, setStatus] = useState(undefined);
 
   // validate form field
   // TODO: build other test for phone number
@@ -23,6 +28,14 @@ const App = () => {
       // .matches(phoneRegExp, 'Phone number is not valid')
       .required('Required'),
   });
+
+  useEffect(() => {
+    socketRef.current = socketIOClient('');
+    socketRef.current.on(NEW_EVENT, message => {
+      setStatus(message);
+    });
+  }, []);
+
   // submit handler
   const onSubmitHandler = values => {
     fetch('/call', {
@@ -34,7 +47,7 @@ const App = () => {
     })
       .then(response => response.json())
       .then(data => {
-        setStatus(data);
+        console.log(data);
       })
       .catch(error => {
         console.error('Error:', error);
