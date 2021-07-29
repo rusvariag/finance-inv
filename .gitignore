@@ -1,2 +1,5 @@
 # dependencies
 /client/node_modules
+
+# garbage
+/client/build
